@@ -2,7 +2,7 @@
 
 Link to room: https://tryhackme.com/room/vulnnetroasted
 
-### This is Windows activie directory machine
+### This is a Windows activie directory machine
 
 Let's start with an nmap scan:
 
@@ -50,3 +50,20 @@ Service detection performed. Please report any incorrect results at https://nmap
 ```
 
 Based on the opened ports like 53(DNS) and 88(kerberos), we can assume this is a windows active directory machine
+
+## SMB Enum
+
+```
+╭── /opt/share/tryhackme/vulnet  master ✘✘✘ ✭  
+╰────▶ smbmap -H vulnet.thm -u guest -p ''
+[+] IP: vulnet.thm:445  Name: unknown                                           
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    READ ONLY       Remote IPC
+        NETLOGON                                                NO ACCESS       Logon server share 
+        SYSVOL                                                  NO ACCESS       Logon server share 
+        VulnNet-Business-Anonymous                              READ ONLY       VulnNet Business Sharing
+        VulnNet-Enterprise-Anonymous                            READ ONLY       VulnNet Enterprise Sharing
+```
