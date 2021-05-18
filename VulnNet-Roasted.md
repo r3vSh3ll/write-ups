@@ -149,6 +149,7 @@ Try to access smb again with t-skid's creds to see if we can elevate our access 
 smbmap -H vulnet.thm -u t-skid -p '<redacted>'
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118689875-77c13580-b7d5-11eb-88a7-c99bc26d771f.png)
+
 Notice t-skid now has read access to NETLOGON and SYSVOL shares which we did not have with the anonymous logins
 
 Let's access NETLOGON share with smbclient and see what we've got in there using t-skid's creds
