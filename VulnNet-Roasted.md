@@ -166,7 +166,7 @@ Pass a-whitehat's creds into evil-winrm to get the initial foothold into the mac
 ```
 evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 ```
-![image](https://user-images.githubusercontent.com/68066436/118691845-78f36200-b7d7-11eb-9909-907830b69594.png)
+![image](https://user-images.githubusercontent.com/68066436/118693125-c45a4000-b7d8-11eb-9b0b-cf9abceba4aa.png)
 
 
 ## Privilege Escalation
