@@ -5,7 +5,9 @@ Link to room: https://tryhackme.com/room/vulnnetroasted
 ### This is a Windows activie directory machine
 
 Let's start with an nmap scan:
-
+```
+nmap -p- -v -sC -sV -Pn -oN nmap-all-ports vulnet.thm
+```
 ```python
 # Nmap 7.91 scan initiated Sun May 16 16:34:12 2021 as: nmap -p- -v -sC -sV -Pn -oN nmap-all-ports vulnet.thm
 Nmap scan report for vulnet.thm (10.10.123.68)
