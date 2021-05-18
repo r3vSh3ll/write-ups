@@ -4,7 +4,7 @@ Link to room: https://tryhackme.com/room/vulnnetroasted
 
 ### Windows Active Directory
 
-Let's start with an nmap scan:
+Let's start our enumeration with an nmap scan:
 ```
 nmap -p- -v -sC -sV -Pn -oN nmap-all-ports vulnet.thm
 ```
