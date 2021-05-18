@@ -172,6 +172,7 @@ evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 ## Privilege Escalation
 
 Checked groups and realised user a-whitehat belongs to domain admins group, this will enable us dump hashes from SAM database using secretsdump.py from impacket
+
 ![image](https://user-images.githubusercontent.com/68066436/118693532-21ee8c80-b7d9-11eb-9b2d-195be8421d32.png)
 
 Let's dump the hashes with secretsdump
@@ -201,8 +202,9 @@ Navigate to C:\Users\Administrator\Desktop\system.txt
 ![image](https://user-images.githubusercontent.com/68066436/118696998-db029600-b7dc-11eb-8f7d-e0673173e282.png)
 
 
-This is the end of my write-up, hope you enjoyed reading....
 
 
- <script src="https://tryhackme.com/badge/19802"></script>      <script src="https://www.hackthebox.eu/badge/139980"></script>
+##This is the end of my write-up, hope you enjoyed reading....
+
+
 
