@@ -2,7 +2,7 @@
 
 Link to room: https://tryhackme.com/room/vulnnetroasted
 
-### This is a Windows activie directory machine
+### Windows Active Directory
 
 Let's start with an nmap scan:
 ```
