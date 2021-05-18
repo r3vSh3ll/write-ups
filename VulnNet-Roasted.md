@@ -168,7 +168,7 @@ user: a-whitehat
 pass: <redacted>
 ```
 ##
-Pass a-whitehat's creds into evil-winrm to get the initial foothold into the machine
+Pass a-whitehat's creds into evil-winrm to get the initial foothold of the machine
 ```python
 evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 ```
