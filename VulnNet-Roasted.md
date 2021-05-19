@@ -144,7 +144,7 @@ user: t-skid
 pass: <redacted>
 ```
 ##
-Try to access smb again with t-skid's creds to see if we can elevate our access to some shares
+Try to access smb again with t-skid's creds to see if we can elevate our access on some shares
 ```python
 smbmap -H vulnet.thm -u t-skid -p '<redacted>'
 ```
