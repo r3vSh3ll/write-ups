@@ -110,7 +110,7 @@ Time to find a way to enumerate usernames on the box. i will be using rid-brute 
 ```python
 crackmapexec smb vulnet.thm -u robot -p '' --rid-brute | grep  SidTypeUser
 ```
-Since anonymous login allowed, you can replace username robot with whatever name you like. I used robot because i am ROBOT -:)
+Since anonymous login is allowed, you can replace username robot with whatever name you like. I used robot because i am a ROBOT -:)
 
 ![image](https://user-images.githubusercontent.com/68066436/118685539-3038aa80-b7d1-11eb-91e9-572fcd48794a.png)
 
