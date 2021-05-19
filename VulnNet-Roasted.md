@@ -177,7 +177,7 @@ evil-winrm -i vulnet.thm -u a-whitehat -p <redacted>
 
 ## Privilege Escalation
 
-Enumerating user groups, i realised user a-whitehat belongs to the domain admins group, this will enable us dump hashes from SAM database using secretsdump.py from impacket
+Enumerating user groups, i realised user a-whitehat belongs to the domain admins group, so we can do a DCSync attack to dump hashes from the domain controller. Will be using secretsdump from impacket to dump the hashes. You can as well use mimikatz
 
 ![image](https://user-images.githubusercontent.com/68066436/118728937-fda7a580-b802-11eb-8ce6-cd5e555bc129.png)
 
